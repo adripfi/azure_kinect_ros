@@ -1,5 +1,6 @@
  
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+# FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+FROM ubuntu:18.04
 # FROM nvidia/cuda:11.5.0-cudnn8-runtime-ubuntu18.04
 
 RUN sed -i 's@archive.ubuntu.com@ftp.jaist.ac.jp/pub/Linux@g' /etc/apt/sources.list
@@ -8,7 +9,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 #######################################################################
 ##                    install essential packages                     ##
 #######################################################################
-RUN rm /etc/apt/sources.list.d/cuda.list
+# RUN rm /etc/apt/sources.list.d/cuda.list
 # RUN rm /etc/apt/sources.list.d/nvidia-ml.list
 
 
@@ -37,16 +38,16 @@ RUN apt-get update && apt-get install  -y python-ruamel.yaml
 ##                       install nvidia docker                       ##
 #######################################################################
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libxau-dev \
-    libxdmcp-dev \
-    libxcb1-dev \
-    libxext-dev \
-    libx11-dev
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     libxau-dev \
+#     libxdmcp-dev \
+#     libxcb1-dev \
+#     libxext-dev \
+#     libx11-dev
 
 # nvidia-container-runtime
-ENV NVIDIA_VISIBLE_DEVICES ${NVIDIA_VISIBLE_DEVICES:-all}
-ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+# ENV NVIDIA_VISIBLE_DEVICES ${NVIDIA_VISIBLE_DEVICES:-all}
+# ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
 
 # install GLX-Gears
 RUN apt update && apt install -y --no-install-recommends \
@@ -195,15 +196,27 @@ RUN mkdir -p /catkin_ws/src && \
 
 RUN cd /catkin_ws/src && \
     git clone https://github.com/microsoft/Azure_Kinect_ROS_Driver.git -b melodic && \
-    cd Azure_Kinect_ROS_Driver && \
-    git checkout cda16bc8733a3851c2c723ea433d32aa4fa5468b
+    cd Azure_Kinect_ROS_Driver
 
+# # Prequisits for improved urdf
+# RUN apt-get update && \
+#     apt-get install ros-melodic-rgbd-launch -y
+# # checkout improved urdf pull request
+# RUN cd /catkin_ws/src/Azure_Kinect_ROS_Driver && \
+#   git fetch origin pull/240/head:urdf  && \
+#   git checkout urdf
+#
 RUN cd /catkin_ws && \
    /bin/bash -c 'source /opt/ros/melodic/setup.bash;catkin_make --force-cmake'
 RUN echo "source /catkin_ws/devel/setup.bash" >> ~/.bashrc
+
 
 #######################################################################
 ##                           ros settings                            ##
 #######################################################################
 
 RUN echo "export PS1='\[\e[1;31;40m\]AzureKinect\[\e[0m\] \u:\w\$ '">> ~/.bashrc
+
+# install neovim for editing files
+RUN  apt-get update && \
+     apt-get install neovim -y
