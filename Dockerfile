@@ -220,3 +220,7 @@ RUN echo "export PS1='\[\e[1;31;40m\]AzureKinect\[\e[0m\] \u:\w\$ '">> ~/.bashrc
 # install neovim for editing files
 RUN  apt-get update && \
      apt-get install neovim -y
+
+
+RUN echo "roslaunch azure_kinect_ros_driver my.launch" >> /launch.sh && \
+    chmod +x /launch.sh
